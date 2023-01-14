@@ -34,7 +34,7 @@ export default function HomePage({ dungeons }: Props) {
             <Link href={Routes.playDungeon(dungeon)}>
               Play
             </Link>
-            )
+            {')'}
           </li>
         )}
       </ul>
