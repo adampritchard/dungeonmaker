@@ -1,6 +1,5 @@
 import React from 'react';
-
-type TileMap = number[][];
+import { TileMap } from '@/types';
 
 type TileGridProps = {
   tiles: TileMap,

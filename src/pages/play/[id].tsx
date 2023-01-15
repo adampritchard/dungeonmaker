@@ -1,23 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { PrismaClient, Dungeon } from '@prisma/client';
-import { TileGrid } from '@/components/TileGrid';
+import { initGame } from '@/game';
 
 type Props = {
   dungeon: Dungeon,
 };
 
 export default function PlayPage({ dungeon }: Props) {
+  const [ref, setRef] = useState<HTMLDivElement|null>(null);
+  useEffect(() => {
+    const game = initGame(ref, dungeon);
+
+    return () => {
+      if (game) game.destroy();
+    };
+  }, [ref, dungeon]);
+
   return (
     <div>
       <h1>{dungeon.name}</h1>
-
-      <TileGrid
-        tiles={dungeon.tiles ? JSON.parse(dungeon.tiles) : []}
-        onClickTile={() => {}}
-      />
-
+      <div ref={setRef} />
       <div style={{ marginTop: 20 }}>
         <Link href="/">
           Back

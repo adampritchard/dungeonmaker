@@ -4,8 +4,7 @@ import Link from 'next/link';
 import { PrismaClient, Dungeon } from '@prisma/client';
 import { Api } from '@/utils/api-client';
 import { TileGrid } from '@/components/TileGrid';
-
-type TileMap = number[][];
+import { TileMap } from '@/types';
 
 const initialTiles: TileMap = [
   [1, 1, 1, 1, 0, 1, 1, 1, 1],
