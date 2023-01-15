@@ -44,6 +44,10 @@ export class Game extends Application {
 
   private wallTexture!: Texture;
   private floorTexture!: Texture;
+  private keyTexture!: Texture;
+  private doorTexture!: Texture;
+
+  private keyCount = 0;
 
   constructor(dungeon: Dungeon, mode: GameMode) {
     super({
@@ -68,10 +72,12 @@ export class Game extends Application {
   }
 
   private initMap() {
+    // TODO: setup an Assets class and call Assets.init();
     const spritesheet = BaseTexture.from('/sprites.png');
-    const rockTexture   = getTexture(spritesheet,  2, 2);
-    this.floorTexture   = getTexture(spritesheet, 12, 0);
+    this.floorTexture   = getTexture(spritesheet,  8, 2);
     this.wallTexture    = getTexture(spritesheet,  0, 2);
+    this.keyTexture     = getTexture(spritesheet, 15, 4);
+    this.doorTexture    = getTexture(spritesheet, 13, 2);
     const playerTexture = getTexture(spritesheet,  0, 3);
     const gemTexture    = getTexture(spritesheet, 21, 4);
 
@@ -172,8 +178,8 @@ export class Game extends Application {
       bg.y = y;
       this.stage.addChild(bg);
 
-      const btn = Sprite.from(this.textureForType(tileType));
-      btn.tint = 0x505050;
+      const btn = new Sprite();
+      this.setTileGraphics(btn, tileType);
       btn.x = x;
       btn.y = y;
       btn.interactive = true;
@@ -217,13 +223,34 @@ export class Game extends Application {
   }
 
   private movePlayer(x: number, y: number) {
+    let allowMove = false;
+
     const tileX = Math.floor(x / tileSize);
     const tileY = Math.floor(y / tileSize);
-
     const maxX = this.tiles[0].length;
     const maxY = this.tiles.length;
 
-    if (tileX >= 0 && tileX < maxX && tileY >= 0 && tileY < maxY && !this.tiles[tileY][tileX]) {
+    if (tileX >= 0 && tileX < maxX && tileY >= 0 && tileY < maxY) {
+      const tile = this.tiles[tileY][tileX];
+
+      if (tile === TileType.Floor) {
+        allowMove = true;
+      } else if (tile === TileType.Key) {
+        // Collect key.
+        this.tiles[tileY][tileX] = TileType.Floor;
+        this.setTileGraphics(this.tileSprites[tileY][tileX], TileType.Floor);
+        this.keyCount += 1;
+        allowMove = true;
+      } else if (tile === TileType.Door && this.keyCount > 0) {
+        // Open door.
+        this.tiles[tileY][tileX] = TileType.Floor;
+        this.setTileGraphics(this.tileSprites[tileY][tileX], TileType.Floor);
+        this.keyCount -= 1;
+        allowMove = true;
+      }
+    }
+
+    if (allowMove) {
       this.player.x = x;
       this.player.y = y;
     }
@@ -236,24 +263,42 @@ export class Game extends Application {
   private drawTile(x: number, y: number) {
     if (this.tiles[y][x] !== this.selectedTileType) {
       this.tiles[y][x] = this.selectedTileType;
-      this.tileSprites[y][x].texture = this.textureForType(this.selectedTileType);
+      this.setTileGraphics(this.tileSprites[y][x], this.selectedTileType);
     }
   }
 
   private makeTileSprite(x: number, y: number, type: TileType) {
-    const sprite = Sprite.from(this.textureForType(type));
-    sprite.tint = 0x505050;
+    const sprite = new Sprite();
+    this.setTileGraphics(sprite, type);
     sprite.x = tileSize * x;
     sprite.y = tileSize * y;
     this.tileGroup.addChild(sprite);
     return sprite;
   }
 
-  private textureForType(tileType: TileType): Texture {
-    switch (tileType) {
-      case TileType.Floor: return this.floorTexture;
-      case TileType.Wall:  return this.wallTexture;
-      default: throw new Error(`textureForType not implemented for type: ${tileType}`);
-    }
+  private setTileGraphics(sprite: Sprite, type: TileType) {
+    type Gfx = { texture: Texture, tint: number };
+
+    const gfx: Record<TileType, Gfx> = {
+      [TileType.Floor]: {
+        texture: this.floorTexture,
+        tint: 0x0F0F0F,
+      },
+      [TileType.Wall]: {
+        texture: this.wallTexture,
+        tint: 0x525252,
+      },
+      [TileType.Key]: {
+        texture: this.keyTexture,
+        tint: 0xfde047,
+      },
+      [TileType.Door]: {
+        texture: this.doorTexture,
+        tint: 0x9a3412,
+      },
+    };
+
+    sprite.texture = gfx[type].texture;
+    sprite.tint = gfx[type].tint;
   }
 }
