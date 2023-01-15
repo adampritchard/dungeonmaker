@@ -1,8 +1,10 @@
-import { Application, Graphics } from 'pixi.js';
+import * as PIXI from 'pixi.js';
+import { Application, BaseTexture, Texture, Rectangle, Sprite } from 'pixi.js';
 import { Dungeon } from '@prisma/client';
 import { TileMap } from '@/types';
 
-const tileSize = 32;
+const tileSize = 8;
+const scale = 4;
 
 export function initGame(mount: HTMLDivElement|null, dungeon: Dungeon) {
   if (!mount) return null;
@@ -11,20 +13,25 @@ export function initGame(mount: HTMLDivElement|null, dungeon: Dungeon) {
   const tiles: TileMap = JSON.parse(dungeon.tiles);
 
   const app = new Application({
-    width: tileSize * 9,
-    height: tileSize * 9,
-    background: 0xCCCCCC,
+    width: (tileSize * 9 + 1) * scale,
+    height: (tileSize * 9 + 1) * scale,
   });
+  PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+  app.stage.scale.set(scale);
   mount.replaceChildren(app.view as any);
+
+  const spritesheet = BaseTexture.from('/sprites.png');
+  const rockTexture   = getTexture(spritesheet,  2, 2);
+  const wallTexture   = getTexture(spritesheet,  0, 2);
+  const playerTexture = getTexture(spritesheet,  0, 3);
+  const gemTexture    = getTexture(spritesheet, 21, 4);
 
   for (let y = 0; y < tiles.length; y += 1) {
     const row = tiles[y];
     for (let x = 0; x < row.length; x += 1) {
       if (row[x]) {
-        const wall = new Graphics();
-        wall.beginFill(0x000000);
-        wall.drawRect(0, 0, tileSize, tileSize);
-        wall.endFill();
+        const wall = Sprite.from(wallTexture);
+        wall.tint = 0x505050;
         wall.x = tileSize * x;
         wall.y = tileSize * y;
         app.stage.addChild(wall);
@@ -32,28 +39,15 @@ export function initGame(mount: HTMLDivElement|null, dungeon: Dungeon) {
     }
   }
 
-  const entry = new Graphics();
-  entry.beginFill(0xBBBBBB);
-  entry.drawRect(0, 0, tileSize, tileSize);
-  entry.endFill();
-  entry.x = tileSize * 4;
-  entry.y = 0;
-  app.stage.addChild(entry);
-
-  const exit = new Graphics();
-  exit.beginFill(0xDDDDDD);
-  exit.drawRect(0, 0, tileSize, tileSize);
-  exit.endFill();
+  const exit = Sprite.from(gemTexture);
+  exit.tint = 0xFF0000;
   exit.x = tileSize * 4;
   exit.y = tileSize * 8;
   app.stage.addChild(exit);
 
-  const player = new Graphics();
-  player.beginFill(0xFF0000);
-  player.drawRect(0, 0, tileSize - 12, tileSize - 12);
-  player.endFill();
-  player.x = tileSize * 4 + 6;
-  player.y = 6;
+  const player = Sprite.from(playerTexture);
+  player.x = tileSize * 4;
+  player.y = 0
   app.stage.addChild(player);
 
   const onKeyUp = (event: KeyboardEvent) => {
@@ -83,7 +77,7 @@ export function initGame(mount: HTMLDivElement|null, dungeon: Dungeon) {
   };
 }
 
-function move(player: Graphics, x: number, y: number, tiles: TileMap) {
+function move(player: Sprite, x: number, y: number, tiles: TileMap) {
   const tileX = Math.floor(x / tileSize);
   const tileY = Math.floor(y / tileSize);
 
@@ -95,4 +89,8 @@ function move(player: Graphics, x: number, y: number, tiles: TileMap) {
   if (tileX === 4 && tileY === 8) {
     setTimeout(() => alert('you win!'), 100);
   }
+}
+
+function getTexture(spritesheet: BaseTexture, x: number, y: number): Texture {
+  return new Texture(spritesheet, new Rectangle(tileSize * x, tileSize * y, tileSize, tileSize));
 }
