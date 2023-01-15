@@ -1,11 +1,14 @@
 import { Dungeon } from '@prisma/client';
+import { encodeUid } from './uids';
 
 export class Routes {
   static editDungeon(dungeon: Dungeon): string {
-    return `/edit/${dungeon.id}`;
+    const uid = encodeUid(dungeon.id);
+    return `/edit/${uid}`;
   }
   
   static playDungeon(dungeon: Dungeon): string {
-    return `/play/${dungeon.id}`;
+    const uid = encodeUid(dungeon.id);
+    return `/play/${uid}`;
   }
 }

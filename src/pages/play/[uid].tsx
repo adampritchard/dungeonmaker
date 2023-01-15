@@ -3,6 +3,7 @@ import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { PrismaClient, Dungeon } from '@prisma/client';
 import { initGame } from '@/game';
+import { decodeUid } from '@/utils/uids';
 
 type Props = {
   dungeon: Dungeon,
@@ -32,7 +33,7 @@ export default function PlayPage({ dungeon }: Props) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const id = Number(context.params?.id);
+  const id = decodeUid(context.params?.uid as string);
 
   const db = new PrismaClient();
   const dungeon = await db.dungeon.findUnique({ where: { id } });

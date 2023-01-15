@@ -5,6 +5,7 @@ import { PrismaClient, Dungeon } from '@prisma/client';
 import { Api } from '@/utils/api-client';
 import { TileGrid } from '@/components/TileGrid';
 import { TileMap } from '@/types';
+import { decodeUid } from '@/utils/uids';
 
 const initialTiles: TileMap = [
   [1, 1, 1, 1, 0, 1, 1, 1, 1],
@@ -82,7 +83,7 @@ export default function EditPage({ dungeon }: Props) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const id = Number(context.params?.id);
+  const id = decodeUid(context.params?.uid as string);
 
   const db = new PrismaClient();
   const dungeon = await db.dungeon.findUnique({ where: { id } });
