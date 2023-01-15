@@ -3,21 +3,10 @@ import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { PrismaClient, Dungeon } from '@prisma/client';
 import { Api } from '@/utils/api-client';
-import { TileGrid } from '@/components/TileGrid';
-import { TileMap } from '@/types';
 import { decodeUid } from '@/utils/uids';
-
-const initialTiles: TileMap = [
-  [1, 1, 1, 1, 0, 1, 1, 1, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 1, 1, 1, 0, 1, 1, 1, 1],
-];
+import { assert } from '@/utils/misc';
+import { GameContainer } from '@/components/GameContainer';
+import type { Game } from '@/game';
 
 type Props = {
   dungeon: Dungeon,
@@ -25,37 +14,22 @@ type Props = {
 
 export default function EditPage({ dungeon }: Props) {
   const [name, setName] = useState(dungeon.name);
-  const [tiles, setTiles] = useState<TileMap>(dungeon.tiles ? JSON.parse(dungeon.tiles) : initialTiles);
+  const [gameRef, setGameRef] = useState<Game|null>(null);
 
   const onClickSave = async () => {
+    assert(gameRef);
+
     await Api.updateDungeon(dungeon.id, {
       name,
-      tiles: JSON.stringify(tiles),
+      tiles: JSON.stringify(gameRef.tiles),
     });
 
     alert('ok!');
   };
 
-  const toggleTile = (x: number, y: number) => {
-    setTiles(rows => rows.map((row, index) => {
-
-      if (index === y) {
-        return row.map((tile, index) => {
-          if (index === x) {
-            return tile === 1 ? 0 : 1;
-          } else {
-            return tile;
-          }
-        });
-      } else {
-        return row;
-      }
-    }));
-  };
-
   return (
     <div>
-      <div>
+      <div style={{ marginBottom: 20 }}>
         <input
           id="name"
           value={name ?? ''}
@@ -63,10 +37,10 @@ export default function EditPage({ dungeon }: Props) {
         />
       </div>
 
-      <TileGrid
-        tiles={tiles}
-        onClickTile={toggleTile}
-        isEditing
+      <GameContainer
+        mode="edit"
+        dungeon={dungeon}
+        gameRef={setGameRef}
       />
 
       <div style={{ marginTop: 20 }}>
