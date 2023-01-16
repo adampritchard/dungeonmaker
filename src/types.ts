@@ -7,6 +7,8 @@ export enum TileType {
   Wall  = 1,
   Key   = 2,
   Door  = 3,
+  Spawn = 4,
+  Exit  = 5,
 };
 
 export const allTileTypes = Object.values(TileType).filter((v) => !isNaN(Number(v))) as TileType[];

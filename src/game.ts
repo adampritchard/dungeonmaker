@@ -7,7 +7,7 @@ const tileSize = 8;
 const scale = 4;
 
 const initialTiles: TileMap = [
-  [1, 1, 1, 1, 0, 1, 1, 1, 1],
+  [1, 1, 1, 1, 4, 1, 1, 1, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -15,17 +15,13 @@ const initialTiles: TileMap = [
   [1, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 1, 1, 1, 0, 1, 1, 1, 1],
+  [1, 1, 1, 1, 5, 1, 1, 1, 1],
 ];
 
 export function initGame(mount: HTMLDivElement, dungeon: Dungeon, mode: GameMode) {
   const game = new Game(dungeon, mode);
   mount.replaceChildren(game.view as any);
   return game;
-}
-
-function getTexture(spritesheet: BaseTexture, x: number, y: number): Texture {
-  return new Texture(spritesheet, new Rectangle(tileSize * x, tileSize * y, tileSize, tileSize));
 }
 
 export class Game extends Application {
@@ -42,10 +38,12 @@ export class Game extends Application {
   private tileCursor!: Graphics;
   private mouseDrag = false;
 
+  private playerTexture!: Texture;
   private wallTexture!: Texture;
   private floorTexture!: Texture;
   private keyTexture!: Texture;
   private doorTexture!: Texture;
+  private gemTexture!: Texture;
 
   private keyCount = 0;
 
@@ -74,32 +72,46 @@ export class Game extends Application {
   private initMap() {
     // TODO: setup an Assets class and call Assets.init();
     const spritesheet = BaseTexture.from('/sprites.png');
-    this.floorTexture   = getTexture(spritesheet,  8, 2);
-    this.wallTexture    = getTexture(spritesheet,  0, 2);
-    this.keyTexture     = getTexture(spritesheet, 15, 4);
-    this.doorTexture    = getTexture(spritesheet, 13, 2);
-    const playerTexture = getTexture(spritesheet,  0, 3);
-    const gemTexture    = getTexture(spritesheet, 21, 4);
+    this.floorTexture   = this.getTexture(spritesheet,  8, 2);
+    this.wallTexture    = this.getTexture(spritesheet,  0, 2);
+    this.keyTexture     = this.getTexture(spritesheet, 15, 4);
+    this.doorTexture    = this.getTexture(spritesheet, 13, 2);
+    this.playerTexture  = this.getTexture(spritesheet,  0, 3);
+    this.gemTexture     = this.getTexture(spritesheet, 21, 4);
 
     this.tileGroup = new Container();
     this.stage.addChild(this.tileGroup);
+
+    // Get the spawn x,y and replace with floor tile.
+    let spawnX = 0;
+    let spawnY = 0;
+
+    if (this.mode === 'play') {
+      for (let y = 0; y < this.tiles.length; y += 1) {
+        const row = this.tiles[y];
+        for (let x = 0; x < row.length; x += 1) {
+          const tile = row[x];
+          if (tile === TileType.Spawn) {
+            row[x] = TileType.Floor;
+            spawnX = x * tileSize;
+            spawnY = y * tileSize;
+          }
+        }
+      }
+    }
 
     this.tileSprites = this.tiles.map((row, y) =>
       row.map((tile, x) =>
         this.makeTileSprite(x, y, tile)
       )
     );
-  
-    const exit = Sprite.from(gemTexture);
-    exit.tint = 0xf43f5e;
-    exit.x = tileSize * 4;
-    exit.y = tileSize * 8;
-    this.stage.addChild(exit);
-  
-    this.player = Sprite.from(playerTexture);
-    this.player.x = tileSize * 4;
-    this.player.y = 0
-    this.stage.addChild(this.player);
+
+    if (this.mode === 'play') {
+      this.player = Sprite.from(this.playerTexture);
+      this.player.x = spawnX;
+      this.player.y = spawnY;
+      this.stage.addChild(this.player);
+    }
 
     this.tileCursor = new Graphics();
     this.tileCursor.lineStyle(1, 0xFFFFFF, 0.8, 0);
@@ -247,6 +259,9 @@ export class Game extends Application {
         this.setTileGraphics(this.tileSprites[tileY][tileX], TileType.Floor);
         this.keyCount -= 1;
         allowMove = true;
+      } else if (tile === TileType.Exit) {
+        setTimeout(() => alert('you win!'), 100);
+        allowMove = true;
       }
     }
 
@@ -254,16 +269,42 @@ export class Game extends Application {
       this.player.x = x;
       this.player.y = y;
     }
-
-    if (tileX === 4 && tileY === 8) {
-      setTimeout(() => alert('you win!'), 100);
-    }
   }
 
   private drawTile(x: number, y: number) {
     if (this.tiles[y][x] !== this.selectedTileType) {
+
+      // Only allow one spawn.
+      if (this.selectedTileType === TileType.Spawn) {
+        this.replaceAllTilesOfType(TileType.Spawn, TileType.Floor);
+      }
+
+      // Only allow one exit.
+      if (this.selectedTileType === TileType.Exit) {
+        this.replaceAllTilesOfType(TileType.Exit, TileType.Floor);
+      }
+
       this.tiles[y][x] = this.selectedTileType;
       this.setTileGraphics(this.tileSprites[y][x], this.selectedTileType);
+    }
+  }
+
+  private replaceAllTilesOfType(from: TileType, to: TileType) {
+    this.forEachTile((tile, x, y) => {
+      if (tile === from) {
+        this.setTileGraphics(this.tileSprites[y][x], to);
+        this.tiles[y][x] = to;
+      }
+    });
+  }
+
+  private forEachTile(fn: (tile: TileType, x: number, y: number) => void) {
+    for (let y = 0; y < this.tiles.length; y += 1) {
+      const row = this.tiles[y];
+      for (let x = 0; x < row.length; x += 1) {
+        const tile = row[x];
+        fn(tile, x, y);
+      }
     }
   }
 
@@ -274,6 +315,10 @@ export class Game extends Application {
     sprite.y = tileSize * y;
     this.tileGroup.addChild(sprite);
     return sprite;
+  }
+
+  private getTexture(spritesheet: BaseTexture, x: number, y: number): Texture {
+    return new Texture(spritesheet, new Rectangle(tileSize * x, tileSize * y, tileSize, tileSize));
   }
 
   private setTileGraphics(sprite: Sprite, type: TileType) {
@@ -295,6 +340,14 @@ export class Game extends Application {
       [TileType.Door]: {
         texture: this.doorTexture,
         tint: 0x9a3412,
+      },
+      [TileType.Spawn]: {
+        texture: this.playerTexture,
+        tint: 0xFFFFFF,
+      },
+      [TileType.Exit]: {
+        texture: this.gemTexture,
+        tint: 0x49AEE8,
       },
     };
 
