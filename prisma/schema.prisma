@@ -14,3 +14,9 @@ model Dungeon {
   // TODO: Json datatype not supported by SQLite
   tiles String?
 }
+
+model User {
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
+  password  String
+}

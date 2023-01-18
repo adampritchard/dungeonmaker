@@ -1,3 +1,5 @@
+// Game
+
 export type TileMap = TileType[][];
 
 export type GameMode = 'edit' | 'play';
@@ -12,3 +14,21 @@ export enum TileType {
 };
 
 export const allTileTypes = Object.values(TileType).filter((v) => !isNaN(Number(v))) as TileType[];
+
+// API
+
+declare module 'iron-session' {
+  interface IronSessionData {
+    userId: number,
+  }
+}
+
+export type SignupReqBody = {
+  username: string,
+  password: string,
+};
+
+export type LoginReqBody = {
+  username: string,
+  password: string,
+};
