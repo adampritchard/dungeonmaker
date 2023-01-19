@@ -28,12 +28,14 @@ export default function PlayPage({ dungeon }: Props) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const id = decodeUid(context.params?.uid as string);
+export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  const id = decodeUid(context.params?.uid as string) ?? 0;
 
   const db = new PrismaClient();
   const dungeon = await db.dungeon.findUnique({ where: { id } });
   db.$disconnect();
+
+  if (!dungeon) return { notFound: true };
 
   return {
     props: {

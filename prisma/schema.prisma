@@ -8,15 +8,16 @@ datasource db {
 }
 
 model Dungeon {
-  id    Int      @id @default(autoincrement())
-  name  String?  @default("untitled")
-
-  // TODO: Json datatype not supported by SQLite
-  tiles String?
+  id        Int      @id @default(autoincrement())
+  name      String?  @default("untitled")
+  tiles     String?  // TODO: Json datatype not supported by SQLite
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
 }
 
 model User {
-  id        Int     @id @default(autoincrement())
-  name      String  @unique
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
   password  String
+  dungeons  Dungeon[]
 }

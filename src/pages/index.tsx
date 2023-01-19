@@ -1,5 +1,4 @@
 import React from 'react';
-import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { PrismaClient, Dungeon, User } from '@prisma/client';
@@ -45,10 +44,16 @@ export default function HomePage({ dungeons, user }: Props) {
           <li key={dungeon.id}>
             {dungeon.name}
             {' ('}
-            <Link href={Routes.editDungeon(dungeon)}>
-              Edit
-            </Link>
-            {' / '}
+
+            {dungeon.authorId === user?.id &&
+              <>
+                <Link href={Routes.editDungeon(dungeon)}>
+                  Edit
+                </Link>
+                {' / '}
+              </>
+            }
+
             <Link href={Routes.playDungeon(dungeon)}>
               Play
             </Link>
@@ -82,7 +87,7 @@ export default function HomePage({ dungeons, user }: Props) {
   )
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = withSessionSsr(
+export const getServerSideProps = withSessionSsr<Props>(
   async function getServerSideProps({ req }) {
     const db = new PrismaClient();
     const dungeons = await db.dungeon.findMany();
