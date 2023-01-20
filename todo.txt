@@ -1,0 +1,38 @@
+TODO
+
+- return signup errors
+  - username exists
+  - password must be 8 chars
+
+- link to share dungeon
+
+- user page that lists their dungeons
+
+- client shouldn't encode UID (don't send dungeon ID to client at all)
+  - see Api.updateDungeon
+
+- publish dungeon
+  - can prisma give me an enum type of Draft|Published|Archived ??
+
+- would like a withRequiredSession function that auto 401s 
+  - and rename the other to withOptionalSession
+
+- would like to set a response type on withSessionRoute
+
+- remove TempApiRes
+
+
+DONE
+
+✔ home page to consider session state
+  ✔ not logged-in
+    ✔ list of all dungeons as links to play
+    ✔ login button
+      ✔ reveal a form on same page
+    ✔ signup button
+      ✔ reveal a form on same page
+  ✔ logged-in
+    ✔ list of my dungeons to play or edit
+    ✔ list of all dungeons as links to play
+    ✔ new dungeon button
+    ✔ logout button

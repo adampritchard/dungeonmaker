@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, MouseEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { PrismaClient, Dungeon, User } from '@prisma/client';
@@ -7,87 +7,93 @@ import { Routes } from '@/utils/routes';
 import { withSessionSsr } from "@/utils/session";
 
 type Props = {
-  dungeons: Dungeon[],
-  user: User|null,
+  allDungeons: Dungeon[],
+  user: (User & { dungeons: Dungeon[] })|null,
 };
 
-export default function HomePage({ dungeons, user }: Props) {
+export default function HomePage({ allDungeons, user }: Props) {
   const router = useRouter();
+  const [mode, setMode] = useState<null|'signup-form'|'login-form'>(null);
 
-  const onClickNew = async () => {
+  const onClickNewDungeon = async () => {
     const response = await Api.createDungeon();
     if ('error' in response) {
-      console.error('API error', response.error);
+      alert(`Error: ${response.error}`);
     } else {
       const dungeon: Dungeon = response;
       router.push(Routes.editDungeon(dungeon));
     }
   };
 
-  const onClickSignup = async () => {
-    const user = await Api.signup('test3', 'hellolongerpass');
-    console.log(user);
-  };
-
-  const onClickLogin = async () => {
-    const reponse = await Api.login('test1', 'hello');
-    console.log(reponse);
-  };
-
   const onClickLogout = async () => {
     const reponse = await Api.logout();
     console.log(reponse);
+
+    router.push('/');
   };
 
   return (
     <div>
       <h1>Dungeon Maker</h1>
-      {user && <div>Hello {user.name}!</div>}
 
-      <ul>
-        {dungeons.map(dungeon =>
-          <li key={dungeon.id}>
-            {dungeon.name}
-            {' ('}
+      {user
+        ? <div>
+            Hello {user.name}!
+            &nbsp;&nbsp;
+            <button onClick={onClickLogout}>
+              Logout
+            </button>
+          </div>
+        : <div>
+            <button onClick={() => setMode('signup-form')}>
+              Signup
+            </button>
+            &nbsp;&nbsp;
+            <button onClick={() => setMode('login-form')}>
+              Login
+            </button>
 
-            {dungeon.authorId === user?.id &&
-              <>
+            {mode == 'signup-form' && <SignupForm />}
+            {mode == 'login-form' && <LoginForm />}
+          </div>
+      }
+
+      {user &&
+        <div>
+          <h2>My Dungeons</h2>
+          <ul>
+            {user.dungeons.map(dungeon =>
+              <li key={dungeon.id}>
+                {dungeon.name}
+                {' ('}
                 <Link href={Routes.editDungeon(dungeon)}>
                   Edit
                 </Link>
                 {' / '}
-              </>
-            }
+                <Link href={Routes.playDungeon(dungeon)}>
+                  Play
+                </Link>
+                {')'}
+              </li>
+            )}
+          </ul>
 
+          <button onClick={onClickNewDungeon}>
+            New Dungeon
+          </button>
+        </div>
+      }
+
+      <h2>Dungeons</h2>
+      <ul>
+        {allDungeons.map(dungeon =>
+          <li key={dungeon.id}>
             <Link href={Routes.playDungeon(dungeon)}>
-              Play
+              {dungeon.name}
             </Link>
-            {')'}
           </li>
         )}
       </ul>
-
-      <button onClick={onClickNew}>
-        New Dungeon
-      </button>
-
-      <br />
-
-      <button onClick={onClickSignup}>
-        New User
-      </button>
-
-      <br />
-
-      <button onClick={onClickLogin}>
-        Login
-      </button>
-
-      <br />
-
-      <button onClick={onClickLogout}>
-        Logout
-      </button>
     </div>
   )
 }
@@ -95,17 +101,94 @@ export default function HomePage({ dungeons, user }: Props) {
 export const getServerSideProps = withSessionSsr<Props>(
   async function getServerSideProps({ req }) {
     const db = new PrismaClient();
-    const dungeons = await db.dungeon.findMany();
+    const allDungeons = await db.dungeon.findMany();
     const user = await db.user.findUnique({
-      where: { id: req.session.userId ?? 0 },
+      where: {
+        id: req.session.userId ?? 0,
+      },
+      include: {
+        dungeons: true,
+      },
     });
     db.$disconnect();
 
     return {
       props: {
-        dungeons,
+        allDungeons,
         user,
       },
     };
   }
 );
+
+function LoginForm() {
+  const router = useRouter();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const onClickLogin = async (event: MouseEvent) => {
+    event.preventDefault();
+
+    const response = await Api.login(username, password);
+    if (!response.ok) {
+      alert('Login failed');
+    } else {
+      router.push('/');
+    }
+  };
+
+  return (
+    <form>
+      <input
+        placeholder="User Name"
+        value={username}
+        onChange={event => setUsername(event.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={event => setPassword(event.target.value)}
+      />
+      <button type="submit" onClick={onClickLogin}>
+        Login
+      </button>
+    </form>
+  );
+}
+
+function SignupForm() {
+  const router = useRouter();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const onClickSignup = async (event: MouseEvent) => {
+    event.preventDefault();
+
+    const response = await Api.signup(username, password);
+    if (!response.ok) {
+      alert('Singup failed');
+    } else {
+      router.push('/');
+    }
+  };
+
+  return (
+    <form>
+      <input
+        placeholder="User Name"
+        value={username}
+        onChange={event => setUsername(event.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={event => setPassword(event.target.value)}
+      />
+      <button type="submit" onClick={onClickSignup}>
+        Signup
+      </button>
+    </form>
+  );
+}

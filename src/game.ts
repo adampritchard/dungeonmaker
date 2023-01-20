@@ -121,7 +121,9 @@ export class Game extends Application {
   }
 
   private initEvents() {
-    window.addEventListener('keydown', this.onKeyDown);
+    if (this.mode === 'play') {
+      window.addEventListener('keydown', this.onKeyDown);
+    }
 
     if (this.mode === 'edit') {
       this.tileGroup.interactive = true;

@@ -1,6 +1,6 @@
-import { Dungeon, User } from '@prisma/client';
+import { Dungeon } from '@prisma/client';
 import { encodeUid } from '@/utils/uids';
-import { SignupReqBody, LoginReqBody, ApiError } from '@/types';
+import { SignupReqBody, LoginReqBody, ApiError, TempApiRes } from '@/types';
 
 export class Api {
   static async createDungeon(): Promise<Dungeon|ApiError> {
@@ -12,12 +12,12 @@ export class Api {
     return this.put(`/api/dungeons/${uid}`, data);
   }
 
-  static async signup(username: string, password: string) {
+  static async signup(username: string, password: string): Promise<TempApiRes> {
     const body: SignupReqBody = { username, password };
     return this.post('/api/auth/signup', body);
   }
 
-  static async login(username: string, password: string) {
+  static async login(username: string, password: string): Promise<TempApiRes> {
     const body: LoginReqBody = { username, password };
     return this.post('/api/auth/login', body);
   }
