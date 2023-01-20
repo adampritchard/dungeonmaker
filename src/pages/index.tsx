@@ -26,9 +26,8 @@ export default function HomePage({ allDungeons, user }: Props) {
   };
 
   const onClickLogout = async () => {
-    const reponse = await Api.logout();
-    console.log(reponse);
-
+    await Api.logout();
+    setMode(null);
     router.push('/');
   };
 
@@ -101,7 +100,9 @@ export default function HomePage({ allDungeons, user }: Props) {
 export const getServerSideProps = withSessionSsr<Props>(
   async function getServerSideProps({ req }) {
     const db = new PrismaClient();
+
     const allDungeons = await db.dungeon.findMany();
+
     const user = await db.user.findUnique({
       where: {
         id: req.session.userId ?? 0,
@@ -110,6 +111,7 @@ export const getServerSideProps = withSessionSsr<Props>(
         dungeons: true,
       },
     });
+
     db.$disconnect();
 
     return {
@@ -131,7 +133,7 @@ function LoginForm() {
 
     const response = await Api.login(username, password);
     if (!response.ok) {
-      alert('Login failed');
+      alert(response.error);
     } else {
       router.push('/');
     }
@@ -167,7 +169,7 @@ function SignupForm() {
 
     const response = await Api.signup(username, password);
     if (!response.ok) {
-      alert('Singup failed');
+      alert(response.error);
     } else {
       router.push('/');
     }

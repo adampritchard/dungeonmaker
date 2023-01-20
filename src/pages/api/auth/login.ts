@@ -2,9 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { withSessionRoute } from '@/utils/session';
-import { LoginReqBody } from '@/types';
+import { LoginReqBody, BasicApiRes } from '@/types';
 
-async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
+async function loginRoute(req: NextApiRequest, res: NextApiResponse<BasicApiRes>) {
   const data = JSON.parse(req.body) as LoginReqBody;
   if (data.username && data.password) {
     const db = new PrismaClient();
@@ -27,7 +27,7 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
 
   return res
     .status(401)
-    .json({ ok: false });
+    .json({ ok: false, error: 'invalid username or password' });
 }
 
 export default withSessionRoute(loginRoute);

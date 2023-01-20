@@ -23,9 +23,11 @@ declare module 'iron-session' {
   }
 }
 
-// TODO: remove lazy temp response
-export type TempApiRes = {
-  ok: boolean,
+export type BasicApiRes = {
+  ok: true,
+} | {
+  ok: false,
+  error: string,
 };
 
 export type ApiError = {

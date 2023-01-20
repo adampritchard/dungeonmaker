@@ -21,7 +21,7 @@ export default function PlayPage({ dungeon }: Props) {
 
       <div style={{ marginTop: 20 }}>
         <Link href="/">
-          Back
+          More Dungeons
         </Link>
       </div>
     </div>

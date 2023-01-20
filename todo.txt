@@ -1,9 +1,5 @@
 TODO
 
-- return signup errors
-  - username exists
-  - password must be 8 chars
-
 - link to share dungeon
 
 - user page that lists their dungeons
@@ -16,10 +12,6 @@ TODO
 
 - would like a withRequiredSession function that auto 401s 
   - and rename the other to withOptionalSession
-
-- would like to set a response type on withSessionRoute
-
-- remove TempApiRes
 
 
 DONE
@@ -36,3 +28,6 @@ DONE
     ✔ list of all dungeons as links to play
     ✔ new dungeon button
     ✔ logout button
+✔ update TemApiRes to BasicApiRes
+✔ add types to api responses
+✔ return signup errors
