@@ -78,7 +78,7 @@ export const getServerSideProps = withSessionSsr<Props>(
     }
 
     // TODO: return unauthorised...
-    if (user.id !== dungeon.id) {
+    if (user.id !== dungeon.authorId) {
       return {
         redirect: { destination: '/', permanent: false },
       };

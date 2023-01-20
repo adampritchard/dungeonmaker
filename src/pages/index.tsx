@@ -15,8 +15,13 @@ export default function HomePage({ dungeons, user }: Props) {
   const router = useRouter();
 
   const onClickNew = async () => {
-    const dungeon = await Api.createDungeon();
-    router.push(Routes.editDungeon(dungeon));
+    const response = await Api.createDungeon();
+    if ('error' in response) {
+      console.error('API error', response.error);
+    } else {
+      const dungeon: Dungeon = response;
+      router.push(Routes.editDungeon(dungeon));
+    }
   };
 
   const onClickSignup = async () => {

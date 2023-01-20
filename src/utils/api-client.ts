@@ -1,9 +1,9 @@
 import { Dungeon, User } from '@prisma/client';
 import { encodeUid } from '@/utils/uids';
-import { SignupReqBody, LoginReqBody } from '@/types';
+import { SignupReqBody, LoginReqBody, ApiError } from '@/types';
 
 export class Api {
-  static async createDungeon(): Promise<Dungeon> {
+  static async createDungeon(): Promise<Dungeon|ApiError> {
     return this.post('/api/dungeons', {});
   }
 

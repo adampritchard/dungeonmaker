@@ -23,6 +23,10 @@ declare module 'iron-session' {
   }
 }
 
+export type ApiError = {
+  error: string,
+};
+
 export type SignupReqBody = {
   username: string,
   password: string,
