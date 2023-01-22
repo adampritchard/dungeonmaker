@@ -1,8 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient, Dungeon } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import type { Dungeon } from '@prisma/client';
 import { decodeUid } from '@/utils/uids';
 import { withSessionRoute } from '@/utils/session';
-import { ApiError } from '@/types';
+import type { ApiError } from '@/types';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'PUT') {

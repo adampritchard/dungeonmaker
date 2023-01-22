@@ -1,4 +1,4 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult, NextApiHandler } from 'next';
+import type { GetServerSidePropsContext, GetServerSidePropsResult, NextApiHandler } from 'next';
 import { withIronSessionApiRoute, withIronSessionSsr } from 'iron-session/next';
 
 const sessionOptions = {

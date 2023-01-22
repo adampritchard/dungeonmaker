@@ -1,11 +1,16 @@
 TODO
 
+- get nextjs running on ec2
+
 - link to share dungeon
 
 - user page that lists their dungeons
 
 - client shouldn't encode UID (don't send dungeon ID to client at all)
   - see Api.updateDungeon
+
+- monitoring, probably with sentry
+- tests, probably with jest and cypress
 
 - publish dungeon
   - can prisma give me an enum type of Draft|Published|Archived ??

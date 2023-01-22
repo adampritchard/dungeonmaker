@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { PrismaClient, Dungeon, User } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import type { Dungeon, User } from '@prisma/client';
 import { Api } from '@/utils/api-client';
 import { decodeUid } from '@/utils/uids';
 import { assert } from '@/utils/misc';

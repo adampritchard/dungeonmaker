@@ -1,7 +1,9 @@
 import * as PIXI from 'pixi.js';
-import { Application, BaseTexture, Texture, Rectangle, Sprite, FederatedPointerEvent, Graphics, Container } from 'pixi.js';
-import { Dungeon } from '@prisma/client';
-import { GameMode, TileMap, TileType, allTileTypes } from '@/types';
+import { Application, BaseTexture, Container, Graphics, Sprite, Texture, Rectangle } from 'pixi.js';
+import type { FederatedPointerEvent } from 'pixi.js';
+import type { Dungeon } from '@prisma/client';
+import { TileType, allTileTypes } from '@/types';
+import type { GameMode, TileMap } from '@/types';
 
 const tileSize = 8;
 const scale = 4;

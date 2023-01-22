@@ -1,4 +1,4 @@
-import { Dungeon } from '@prisma/client';
+import type { Dungeon } from '@prisma/client';
 import { encodeUid } from './uids';
 
 export class Routes {

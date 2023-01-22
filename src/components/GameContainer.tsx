@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Dungeon } from '@prisma/client';
-import { initGame, Game } from '@/game';
-import { GameMode } from '@/types';
+import type { Dungeon } from '@prisma/client';
+import { initGame } from '@/game';
+import type { Game } from '@/game';
+import type { GameMode } from '@/types';
 
 type GameProps = {
   dungeon: Dungeon,

@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { withSessionRoute } from '@/utils/session';
-import { SignupReqBody, BasicApiRes } from '@/types';
+import type { SignupReqBody, BasicApiRes } from '@/types';
 
 async function signupRoute(req: NextApiRequest, res: NextApiResponse<BasicApiRes>) {
   const data = JSON.parse(req.body) as SignupReqBody;

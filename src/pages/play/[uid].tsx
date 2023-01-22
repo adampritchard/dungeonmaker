@@ -1,7 +1,8 @@
 import React from 'react';
-import { GetServerSideProps } from 'next';
+import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
-import { PrismaClient, Dungeon } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import type { Dungeon } from '@prisma/client';
 import { decodeUid } from '@/utils/uids';
 import { GameContainer } from '@/components/GameContainer';
 
