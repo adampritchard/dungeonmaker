@@ -5,8 +5,7 @@ const sessionOptions = {
   cookieName: 'dungeonmaker_session',
   password: process.env.SESSION_PASSWORD ?? '',
   cookieOptions: {
-    // secure: process.env.NODE_ENV === 'production',
-    secure: false,
+    secure: process.env.NODE_ENV === 'production',
   },
 };
 
