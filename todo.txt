@@ -1,6 +1,7 @@
 TODO
 
-- get nextjs running on ec2
+✔ get nextjs running on ec2
+- setup https on ec2
 
 - link to share dungeon
 
