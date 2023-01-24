@@ -1,8 +1,16 @@
 TODO
 
-- link to share dungeon
+- 'latest dungeons' list
+  - add byline to list and play page
 
 - user page that lists their dungeons
+
+- update utils/db.ts to not export db
+  - instead export Users and Dungeons classes with methods like Users.findId(...) etc
+  - Users class should return data with of type that excludes password 
+    - https://www.prisma.io/docs/concepts/components/prisma-client/excluding-fields
+
+- 'share' snippet or button on edit/play page
 
 - client shouldn't encode UID (don't send dungeon ID to client at all)
   - see Api.updateDungeon
@@ -38,3 +46,4 @@ DONE
 ✔ setup https on ec2
 ✔ fix prisma usage
 ✔ mask password hash
+✔ push a crate

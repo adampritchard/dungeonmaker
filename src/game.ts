@@ -46,6 +46,7 @@ export class Game extends Application {
   private keyTexture!: Texture;
   private doorTexture!: Texture;
   private gemTexture!: Texture;
+  private crateTexture!: Texture;
 
   private keyCount = 0;
 
@@ -80,6 +81,7 @@ export class Game extends Application {
     this.doorTexture    = this.getTexture(spritesheet, 13, 2);
     this.playerTexture  = this.getTexture(spritesheet,  0, 3);
     this.gemTexture     = this.getTexture(spritesheet, 21, 4);
+    this.crateTexture   = this.getTexture(spritesheet, 21, 2);
 
     this.tileGroup = new Container();
     this.stage.addChild(this.tileGroup);
@@ -182,7 +184,7 @@ export class Game extends Application {
 
     allTileTypes.forEach((tileType, index) => {
       const x = tileSize * 10;
-      const y = 10 + (index * (tileSize + 2));
+      const y = 2 + (index * (tileSize + 2));
 
       // TODO: maybe setup a BrushBtn Sprite/Container class
 
@@ -222,33 +224,34 @@ export class Game extends Application {
 
   private onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'ArrowUp' || event.key === 'w') {
-      this.movePlayer(this.player.x, this.player.y - tileSize);
+      this.movePlayer(0, -tileSize);
     }
 
     if (event.key === 'ArrowDown' || event.key === 's') {
-      this.movePlayer(this.player.x, this.player.y + tileSize);
+      this.movePlayer(0, tileSize);
     }
 
     if (event.key === 'ArrowLeft' || event.key === 'a') {
-      this.movePlayer(this.player.x - tileSize, this.player.y);
+      this.movePlayer(-tileSize, 0);
     }
 
     if (event.key === 'ArrowRight' || event.key === 'd') {
-      this.movePlayer(this.player.x + tileSize, this.player.y);
+      this.movePlayer(tileSize, 0);
     }
   }
 
-  private movePlayer(x: number, y: number) {
+  private movePlayer(dx: number, dy: number) {
     let allowMove = false;
 
-    const tileX = Math.floor(x / tileSize);
-    const tileY = Math.floor(y / tileSize);
-    const maxX = this.tiles[0].length;
-    const maxY = this.tiles.length;
+    const nextX = this.player.x + dx;
+    const nextY = this.player.y + dy;
 
-    if (tileX >= 0 && tileX < maxX && tileY >= 0 && tileY < maxY) {
-      const tile = this.tiles[tileY][tileX];
+    const tileX = Math.floor(nextX / tileSize);
+    const tileY = Math.floor(nextY / tileSize);
 
+    const tile = this.getTileAt(tileX, tileY);
+
+    if (tile !== null) {
       if (tile === TileType.Floor) {
         allowMove = true;
       } else if (tile === TileType.Key) {
@@ -263,16 +266,45 @@ export class Game extends Application {
         this.setTileGraphics(this.tileSprites[tileY][tileX], TileType.Floor);
         this.keyCount -= 1;
         allowMove = true;
+      } else if (tile === TileType.Crate) {
+        const nextCrateTileX = tileX + dx / tileSize;
+        const nextCrateTileY = tileY + dy / tileSize;
+        const nextCrateTile = this.getTileAt(nextCrateTileX, nextCrateTileY);
+        if (nextCrateTile === TileType.Floor) {
+          // Push crate.
+
+          // set current crate tile to floor
+          this.tiles[tileY][tileX] = TileType.Floor;
+          this.setTileGraphics(this.tileSprites[tileY][tileX], TileType.Floor);
+
+          // set next crate tile to create
+          this.tiles[nextCrateTileY][nextCrateTileX] = TileType.Crate;
+          this.setTileGraphics(this.tileSprites[nextCrateTileY][nextCrateTileX], TileType.Crate);
+
+          allowMove = true;
+        }
       } else if (tile === TileType.Exit) {
+        // Exit dungeon.
         setTimeout(() => alert('you win!'), 100);
         allowMove = true;
       }
     }
 
     if (allowMove) {
-      this.player.x = x;
-      this.player.y = y;
+      this.player.x = nextX;
+      this.player.y = nextY;
     }
+  }
+
+  private getTileAt(tileX: number, tileY: number): TileType|null {
+    const maxX = this.tiles[0].length;
+    const maxY = this.tiles.length;
+
+    if (tileX >= 0 && tileX < maxX && tileY >= 0 && tileY < maxY) {
+      return this.tiles[tileY][tileX];
+    }
+
+    return null;
   }
 
   private drawTile(x: number, y: number) {
@@ -352,6 +384,10 @@ export class Game extends Application {
       [TileType.Exit]: {
         texture: this.gemTexture,
         tint: 0x49AEE8,
+      },
+      [TileType.Crate]: {
+        texture: this.crateTexture,
+        tint: 0xd97706,
       },
     };
 
