@@ -112,6 +112,8 @@ export const getServerSideProps = withSessionSsr<Props>(
       },
     });
 
+    if (user) user.password = '?';
+
     return {
       props: {
         allDungeons,

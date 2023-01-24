@@ -37,3 +37,4 @@ DONE
 ✔ get nextjs running on ec2
 ✔ setup https on ec2
 ✔ fix prisma usage
+✔ mask password hash

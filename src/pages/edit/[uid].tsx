@@ -11,10 +11,9 @@ import type { Game } from '@/game';
 
 type Props = {
   dungeon: Dungeon,
-  user: User|null,
 };
 
-export default function EditPage({ dungeon, user }: Props) {
+export default function EditPage({ dungeon }: Props) {
   const [name, setName] = useState(dungeon.name);
   const [gameRef, setGameRef] = useState<Game|null>(null);
 
@@ -86,7 +85,6 @@ export const getServerSideProps = withSessionSsr<Props>(
     return {
       props: {
         dungeon,
-        user,
       },
     };
   }
