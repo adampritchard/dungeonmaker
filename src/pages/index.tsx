@@ -9,7 +9,7 @@ import { withSessionSsr } from "@/utils/session";
 import { db } from '@/utils/db';
 
 type Props = {
-  allDungeons: Dungeon[],
+  allDungeons: (Dungeon & { author: { name: string }})[],
   user: (User & { dungeons: Dungeon[] })|null,
 };
 
@@ -85,13 +85,15 @@ export default function HomePage({ allDungeons, user }: Props) {
         </div>
       }
 
-      <h2>Dungeons</h2>
+      <h2>Latest Dungeons</h2>
       <ul>
         {allDungeons.map(dungeon =>
           <li key={dungeon.id}>
             <Link href={Routes.playDungeon(dungeon)}>
               {dungeon.name}
             </Link>
+            {' '}
+            (by {dungeon.author.name})
           </li>
         )}
       </ul>
@@ -101,7 +103,16 @@ export default function HomePage({ allDungeons, user }: Props) {
 
 export const getServerSideProps = withSessionSsr<Props>(
   async function getServerSideProps({ req }) {
-    const allDungeons = await db.dungeon.findMany();
+    const allDungeons = await db.dungeon.findMany({
+      orderBy: {
+        id: 'desc',
+      },
+      include: {
+        author: {
+          select: { name: true },
+        },
+      },
+    });
 
     const user = await db.user.findUnique({
       where: {
