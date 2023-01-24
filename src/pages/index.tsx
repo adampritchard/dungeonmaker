@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import type { MouseEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { PrismaClient } from '@prisma/client';
 import type { Dungeon, User } from '@prisma/client';
 import { Api } from '@/utils/api-client';
 import { Routes } from '@/utils/routes';
 import { withSessionSsr } from "@/utils/session";
+import { db } from '@/utils/db';
 
 type Props = {
   allDungeons: Dungeon[],
@@ -101,8 +101,6 @@ export default function HomePage({ allDungeons, user }: Props) {
 
 export const getServerSideProps = withSessionSsr<Props>(
   async function getServerSideProps({ req }) {
-    const db = new PrismaClient();
-
     const allDungeons = await db.dungeon.findMany();
 
     const user = await db.user.findUnique({
@@ -113,8 +111,6 @@ export const getServerSideProps = withSessionSsr<Props>(
         dungeons: true,
       },
     });
-
-    db.$disconnect();
 
     return {
       props: {

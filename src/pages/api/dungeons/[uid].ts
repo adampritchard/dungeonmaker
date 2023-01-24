@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
 import type { Dungeon } from '@prisma/client';
 import { decodeUid } from '@/utils/uids';
 import { withSessionRoute } from '@/utils/session';
+import { db } from '@/utils/db';
 import type { ApiError } from '@/types';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -21,8 +21,6 @@ async function updateDungeon(req: NextApiRequest, res: NextApiResponse<Dungeon|A
   const id = decodeUid(req.query.uid as string);
   const data = JSON.parse(req.body) as Dungeon;
 
-  const db = new PrismaClient();
-
   // Check that logged in user owns dungeon.
   const dungeon = await db.dungeon.findUnique({ where: { id } });
   if (req.session.userId !== dungeon?.authorId) {
@@ -30,7 +28,6 @@ async function updateDungeon(req: NextApiRequest, res: NextApiResponse<Dungeon|A
   }
   
   const updatedDungeon = await db.dungeon.update({ where: { id }, data });
-  db.$disconnect();
   
   res
     .status(200)

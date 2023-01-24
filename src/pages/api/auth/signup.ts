@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { withSessionRoute } from '@/utils/session';
+import { db } from '@/utils/db';
 import type { SignupReqBody, BasicApiRes } from '@/types';
 
 async function signupRoute(req: NextApiRequest, res: NextApiResponse<BasicApiRes>) {
@@ -19,16 +19,12 @@ async function signupRoute(req: NextApiRequest, res: NextApiResponse<BasicApiRes
     return res.send({ ok: false, error: 'password must be 8 chars or longer' });
   }
 
-  const db = new PrismaClient();
-
   const existingUser = await db.user.findUnique({
     where: { name: data.username },
   });
 
   if (existingUser) {
-    res.send({ ok: false, error: 'username already taken' });
-    db.$disconnect();
-    return;
+    return res.send({ ok: false, error: 'username already taken' });
   }
 
   const user = await db.user.create({
@@ -39,15 +35,11 @@ async function signupRoute(req: NextApiRequest, res: NextApiResponse<BasicApiRes
   });
 
   if (!user) {
-    res.send({ ok: false, error: 'something went wrong' });
-    db.$disconnect();
-    return;
+    return res.send({ ok: false, error: 'something went wrong' });
   }
 
   req.session.userId = user.id;
   await req.session.save();
-
-  db.$disconnect();
   
   res.json({ ok: true });
 }

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { PrismaClient } from '@prisma/client';
 import type { Dungeon, User } from '@prisma/client';
 import { Api } from '@/utils/api-client';
 import { decodeUid } from '@/utils/uids';
 import { assert } from '@/utils/misc';
 import { withSessionSsr } from "@/utils/session";
+import { db } from '@/utils/db';
 import { GameContainer } from '@/components/GameContainer';
 import type { Game } from '@/game';
 
@@ -62,12 +62,10 @@ export const getServerSideProps = withSessionSsr<Props>(
   async ({ req, params }) => {
     const id = decodeUid(params?.uid as string) ?? 0;
 
-    const db = new PrismaClient();
     const dungeon = await db.dungeon.findUnique({ where: { id } });
     const user = await db.user.findUnique({
       where: { id: req.session.userId ?? 0 },
     });
-    db.$disconnect();
 
     if (!dungeon) return { notFound: true };
 

@@ -1,11 +1,5 @@
 TODO
 
-✔ get nextjs running on ec2
-✔ setup https on ec2
-
-- fix prisma usage
-  - warn(prisma-client) There are already 10 instances of Prisma Client actively running.
-
 - link to share dungeon
 
 - user page that lists their dungeons
@@ -40,3 +34,6 @@ DONE
 ✔ update TemApiRes to BasicApiRes
 ✔ add types to api responses
 ✔ return signup errors
+✔ get nextjs running on ec2
+✔ setup https on ec2
+✔ fix prisma usage
