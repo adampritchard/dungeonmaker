@@ -1,11 +1,14 @@
 TODO
 
-- user page that lists their dungeons
+- game entities for player, create, key, door
+  - move using tile co-ord not pixel co-ord
 
 - update utils/db.ts to not export db
   - instead export Users and Dungeons classes with methods like Users.findId(...) etc
   - Users class should return data with of type that excludes password 
     - https://www.prisma.io/docs/concepts/components/prisma-client/excluding-fields
+  - don't refernce prisma User/Dungeon/etc types directly
+  - can we move all uid encoding/decoding into the db layer? ie: Users.findByUid(...)
 
 - 'share' snippet or button on edit/play page
 
@@ -45,3 +48,6 @@ DONE
 ✔ mask password hash
 ✔ push a crate
 ✔ 'latest dungeons' list
+✔ user page that lists their dungeons
+✔ encode user uids differently to dungeon uids
+✔ user pages use name in url instead of uid

@@ -92,8 +92,11 @@ export default function HomePage({ allDungeons, user }: Props) {
             <Link href={Routes.playDungeon(dungeon)}>
               {dungeon.name}
             </Link>
-            {' '}
-            (by {dungeon.author.name})
+            {' (by '}
+            <Link href={Routes.userPage(dungeon.author)}>
+              {dungeon.author.name}
+            </Link>
+            {')'}
           </li>
         )}
       </ul>

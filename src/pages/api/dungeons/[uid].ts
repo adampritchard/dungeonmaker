@@ -18,16 +18,16 @@ async function updateDungeon(req: NextApiRequest, res: NextApiResponse<Dungeon|A
     return res.status(401).send({ error: 'Unauthorized' });
   }
 
-  const id = decodeUid(req.query.uid as string);
+  const dungeonId = decodeUid('dungeon', req.query.uid as string);
   const data = JSON.parse(req.body) as Dungeon;
 
   // Check that logged in user owns dungeon.
-  const dungeon = await db.dungeon.findUnique({ where: { id } });
+  const dungeon = await db.dungeon.findUnique({ where: { id: dungeonId } });
   if (req.session.userId !== dungeon?.authorId) {
     return res.status(401).send({ error: 'Unauthorized' });
   }
   
-  const updatedDungeon = await db.dungeon.update({ where: { id }, data });
+  const updatedDungeon = await db.dungeon.update({ where: { id: dungeonId }, data });
   
   res
     .status(200)

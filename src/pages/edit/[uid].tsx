@@ -59,9 +59,9 @@ export default function EditPage({ dungeon }: Props) {
 
 export const getServerSideProps = withSessionSsr<Props>(
   async ({ req, params }) => {
-    const id = decodeUid(params?.uid as string) ?? 0;
+    const dungeonId = decodeUid('dungeon', params?.uid as string) ?? 0;
 
-    const dungeon = await db.dungeon.findUnique({ where: { id } });
+    const dungeon = await db.dungeon.findUnique({ where: { id: dungeonId } });
     const user = await db.user.findUnique({
       where: { id: req.session.userId ?? 0 },
     });

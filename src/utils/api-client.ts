@@ -8,7 +8,7 @@ export class Api {
   }
 
   static async updateDungeon(id: number, data: Partial<Dungeon>): Promise<Dungeon|ApiError> {
-    const uid = encodeUid(id);
+    const uid = encodeUid('dungeon', id);
     return this.put(`/api/dungeons/${uid}`, data);
   }
 
