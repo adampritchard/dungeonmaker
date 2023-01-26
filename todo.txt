@@ -2,8 +2,6 @@ TODO
 
 - swipe on mobile to move
 
-- can i reconfigure next to disable experimental appDir ?
-
 - game entities for player, create, key, door
   - move using tile co-ord not pixel co-ord
 
@@ -61,3 +59,4 @@ DONE
 ✔ user pages use name in url instead of uid
 ✔ order 'my dungeons' and user page dungeons by most recent
 ✔ fix mobile resize
+✔ remove experimental app dir
