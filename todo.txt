@@ -60,3 +60,4 @@ DONE
 ✔ order 'my dungeons' and user page dungeons by most recent
 ✔ fix mobile resize
 ✔ remove experimental app dir
+✔ page title

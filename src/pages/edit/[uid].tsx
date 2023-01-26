@@ -30,7 +30,7 @@ export default function EditPage({ dungeon }: Props) {
   };
 
   return (
-    <Layout>
+    <Layout pageTitle="Edit Dungeon">
       <div style={{ marginBottom: 20 }}>
         <input
           id="name"

@@ -15,7 +15,7 @@ type Props = {
 
 export default function PlayPage({ user }: Props) {
   return (
-    <Layout>
+    <Layout pageTitle={user.name}>
       <h1>{user.name}&apos;s Dungeons</h1>
 
       <ul>

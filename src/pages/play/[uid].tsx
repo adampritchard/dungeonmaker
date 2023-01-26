@@ -16,7 +16,7 @@ type Props = {
 
 export default function PlayPage({ dungeon }: Props) {
   return (
-    <Layout>
+    <Layout pageTitle={dungeon.name}>
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ marginBottom: 0 }}>{dungeon.name}</h1>
         <div>
