@@ -1,7 +1,13 @@
 TODO
 
+- swipe on mobile to move
+
+- can i reconfigure next to disable experimental appDir ?
+
 - game entities for player, create, key, door
   - move using tile co-ord not pixel co-ord
+
+- smash crates with hammer?
 
 - update utils/db.ts to not export db
   - instead export Users and Dungeons classes with methods like Users.findId(...) etc
@@ -9,6 +15,8 @@ TODO
     - https://www.prisma.io/docs/concepts/components/prisma-client/excluding-fields
   - don't refernce prisma User/Dungeon/etc types directly
   - can we move all uid encoding/decoding into the db layer? ie: Users.findByUid(...)
+
+- keep track of which dungeons users have beaten
 
 - 'share' snippet or button on edit/play page
 
@@ -51,3 +59,5 @@ DONE
 ✔ user page that lists their dungeons
 ✔ encode user uids differently to dungeon uids
 ✔ user pages use name in url instead of uid
+✔ order 'my dungeons' and user page dungeons by most recent
+✔ fix mobile resize

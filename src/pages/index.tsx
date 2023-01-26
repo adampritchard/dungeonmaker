@@ -7,6 +7,7 @@ import { Api } from '@/utils/api-client';
 import { Routes } from '@/utils/routes';
 import { withSessionSsr } from "@/utils/session";
 import { db } from '@/utils/db';
+import { Layout } from '@/components/Layout';
 
 type Props = {
   allDungeons: (Dungeon & { author: { name: string }})[],
@@ -34,7 +35,7 @@ export default function HomePage({ allDungeons, user }: Props) {
   };
 
   return (
-    <div>
+    <Layout>
       <h1>Dungeon Maker</h1>
 
       {user
@@ -100,8 +101,8 @@ export default function HomePage({ allDungeons, user }: Props) {
           </li>
         )}
       </ul>
-    </div>
-  )
+    </Layout>
+  );
 }
 
 export const getServerSideProps = withSessionSsr<Props>(
@@ -122,7 +123,9 @@ export const getServerSideProps = withSessionSsr<Props>(
         id: req.session.userId ?? 0,
       },
       include: {
-        dungeons: true,
+        dungeons: {
+          orderBy: { id: 'desc' },
+        },
       },
     });
 

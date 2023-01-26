@@ -1,10 +1,10 @@
 import React from 'react';
 import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
-import type { User, Dungeon } from '@prisma/client';
-import { decodeUid } from '@/utils/uids';
+import type { Dungeon } from '@prisma/client';
 import { Routes } from '@/utils/routes';
 import { db } from '@/utils/db';
+import { Layout } from '@/components/Layout';
 
 type Props = {
   user: {
@@ -15,7 +15,7 @@ type Props = {
 
 export default function PlayPage({ user }: Props) {
   return (
-    <div>
+    <Layout>
       <h1>{user.name}&apos;s Dungeons</h1>
 
       <ul>
@@ -33,7 +33,7 @@ export default function PlayPage({ user }: Props) {
           Home
         </Link>
       </div>
-    </div>
+    </Layout>
   );
 }
 
@@ -41,9 +41,17 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
   const username = context.params?.name as string;
 
   const user = await db.user.findUnique({
-    where: { name: username },
-    select: { name: true, dungeons: true },
+    where: {
+      name: username,
+    },
+    select: {
+      name: true,
+      dungeons: {
+        orderBy: { id: 'desc' },
+      },
+    },
   });
+
   if (!user) return { notFound: true };
 
   return {

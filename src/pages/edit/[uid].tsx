@@ -6,6 +6,7 @@ import { decodeUid } from '@/utils/uids';
 import { assert } from '@/utils/misc';
 import { withSessionSsr } from "@/utils/session";
 import { db } from '@/utils/db';
+import { Layout } from '@/components/Layout';
 import { GameContainer } from '@/components/GameContainer';
 import type { Game } from '@/game';
 
@@ -29,7 +30,7 @@ export default function EditPage({ dungeon }: Props) {
   };
 
   return (
-    <div>
+    <Layout>
       <div style={{ marginBottom: 20 }}>
         <input
           id="name"
@@ -53,7 +54,7 @@ export default function EditPage({ dungeon }: Props) {
           Back
         </Link>
       </div>
-    </div>
+    </Layout>
   );
 }
 

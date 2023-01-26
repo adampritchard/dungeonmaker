@@ -5,6 +5,7 @@ import type { Dungeon } from '@prisma/client';
 import { decodeUid } from '@/utils/uids';
 import { db } from '@/utils/db';
 import { Routes } from '@/utils/routes';
+import { Layout } from '@/components/Layout';
 import { GameContainer } from '@/components/GameContainer';
 
 type Props = {
@@ -15,7 +16,7 @@ type Props = {
 
 export default function PlayPage({ dungeon }: Props) {
   return (
-    <div>
+    <Layout>
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ marginBottom: 0 }}>{dungeon.name}</h1>
         <div>
@@ -36,7 +37,7 @@ export default function PlayPage({ dungeon }: Props) {
           Home
         </Link>
       </div>
-    </div>
+    </Layout>
   );
 }
 
