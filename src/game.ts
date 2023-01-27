@@ -5,6 +5,8 @@ import type { Dungeon } from '@prisma/client';
 import { TileType, allTileTypes } from '@/types';
 import type { GameMode, TileMap } from '@/types';
 
+type Direction = 'up' | 'down' | 'left' | 'right';
+
 const tileSize = 8;
 const scale = 4;
 
@@ -38,7 +40,11 @@ export class Game extends Application {
   // TODO: maybe make this brushBtns
   private selectedTileIndicators!: Record<TileType, Graphics>;
   private tileCursor!: Graphics;
-  private mouseDrag = false;
+
+  private isPointerDown = false;
+  private pointerDownX = 0;
+  private pointerDownY = 0;
+  private pointerDownMs = 0;
 
   private playerTexture!: Texture;
   private wallTexture!: Texture;
@@ -125,13 +131,63 @@ export class Game extends Application {
   }
 
   private initEvents() {
+    this.tileGroup.interactive = true;
+
     if (this.mode === 'play') {
       window.addEventListener('keydown', this.onKeyDown);
+
+      this.tileGroup.addEventListener('pointerdown', (e) => {
+        const event = e as FederatedPointerEvent;
+
+        this.pointerDownX = event.globalX;
+        this.pointerDownY = event.globalY;
+        this.pointerDownMs = Date.now();
+        this.isPointerDown = true;
+      });
+
+      const onPointerUp = (e: Event) => {
+        const event = e as FederatedPointerEvent;
+
+        const dx = event.globalX - this.pointerDownX;
+        const dy = event.globalY - this.pointerDownY;
+        const duration = Date.now() - this.pointerDownMs;
+
+        this.pointerDownMs = 0;
+        this.pointerDownX = 0;
+        this.pointerDownY = 0;
+        this.isPointerDown = false;
+
+        const absX = Math.abs(dx);
+        const absY = Math.abs(dy);
+
+        const maxDurationMs = 1000;
+        const distanceThreshold = 20.0;
+        const minRatio = 3.0;
+
+        if (duration < maxDurationMs) {
+          if (absX > distanceThreshold && absX / absY > minRatio) {
+            if (dx > 0) {
+              this.movePlayer('right');
+            } else {
+              this.movePlayer('left');
+            }
+          }
+
+          if (absY > distanceThreshold && absY / absX > minRatio) {
+            if (dy > 0) {
+              this.movePlayer('down');
+            } else {
+              this.movePlayer('up');
+            }
+          }
+        }
+      };
+
+      this.tileGroup.addEventListener('pointerup', onPointerUp);
+      this.tileGroup.addEventListener('pointerupoutside', onPointerUp);
     }
 
     if (this.mode === 'edit') {
-      this.tileGroup.interactive = true;
-
       this.tileGroup.addEventListener('pointerenter', (e) => {
         this.tileCursor.visible = true;
       });
@@ -149,7 +205,7 @@ export class Game extends Application {
         this.tileCursor.position.x = posX;
         this.tileCursor.position.y = posY;
 
-        if (this.mouseDrag) {
+        if (this.isPointerDown) {
           const tx = Math.floor((event.globalX / scale) / tileSize);
           const ty = Math.floor((event.globalY / scale) / tileSize);
           this.drawTile(tx, ty);
@@ -159,7 +215,7 @@ export class Game extends Application {
       this.tileGroup.addEventListener('pointerdown', (e) => {
         const event = e as FederatedPointerEvent;
 
-        this.mouseDrag = true;
+        this.isPointerDown = true;
 
         const tx = Math.floor((event.globalX / scale) / tileSize);
         const ty = Math.floor((event.globalY / scale) / tileSize);
@@ -167,7 +223,7 @@ export class Game extends Application {
       });
 
       this.tileGroup.addEventListener('pointerup', (e) => {
-        this.mouseDrag = false;
+        this.isPointerDown = false;
       });
     }
   }
@@ -224,27 +280,41 @@ export class Game extends Application {
 
   private onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'ArrowUp' || event.key === 'w') {
-      this.movePlayer(0, -tileSize);
+      this.movePlayer('up');
     }
 
     if (event.key === 'ArrowDown' || event.key === 's') {
-      this.movePlayer(0, tileSize);
+      this.movePlayer('down');
     }
 
     if (event.key === 'ArrowLeft' || event.key === 'a') {
-      this.movePlayer(-tileSize, 0);
+      this.movePlayer('left');
     }
 
     if (event.key === 'ArrowRight' || event.key === 'd') {
-      this.movePlayer(tileSize, 0);
+      this.movePlayer('right');
     }
   }
 
-  private movePlayer(dx: number, dy: number) {
+  private movePlayer(direction: Direction) {
     let allowMove = false;
 
-    const nextX = this.player.x + dx;
-    const nextY = this.player.y + dy;
+    const dx: Record<Direction, number> = {
+      'up':    0,
+      'down':  0,
+      'left':  -1,
+      'right': 1,
+    };
+
+    const dy: Record<Direction, number> = {
+      'up':    -1,
+      'down':  1,
+      'left':  0,
+      'right': 0,
+    };
+
+    const nextX = this.player.x + dx[direction] * tileSize;
+    const nextY = this.player.y + dy[direction] * tileSize;
 
     const tileX = Math.floor(nextX / tileSize);
     const tileY = Math.floor(nextY / tileSize);
@@ -267,8 +337,8 @@ export class Game extends Application {
         this.keyCount -= 1;
         allowMove = true;
       } else if (tile === TileType.Crate) {
-        const nextCrateTileX = tileX + dx / tileSize;
-        const nextCrateTileY = tileY + dy / tileSize;
+        const nextCrateTileX = tileX + dx[direction];
+        const nextCrateTileY = tileY + dy[direction];
         const nextCrateTile = this.getTileAt(nextCrateTileX, nextCrateTileY);
         if (nextCrateTile === TileType.Floor) {
           // Push crate.
