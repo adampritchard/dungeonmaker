@@ -1,5 +1,7 @@
 TODO
 
+- strange html comment <!--> in tab title during refresh
+
 - game entities for player, create, key, door
   - move using tile co-ord not pixel co-ord
 
@@ -60,3 +62,4 @@ DONE
 ✔ remove experimental app dir
 ✔ page title
 ✔ swipe on mobile to move
+✔ game assets class

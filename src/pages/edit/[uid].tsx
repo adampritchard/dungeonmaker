@@ -8,7 +8,7 @@ import { withSessionSsr } from "@/utils/session";
 import { db } from '@/utils/db';
 import { Layout } from '@/components/Layout';
 import { GameContainer } from '@/components/GameContainer';
-import type { Game } from '@/game';
+import type { Game } from '@/game/main';
 
 type Props = {
   dungeon: Dungeon,

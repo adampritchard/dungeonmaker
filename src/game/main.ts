@@ -1,13 +1,14 @@
 import * as PIXI from 'pixi.js';
-import { Application, BaseTexture, Container, Graphics, Sprite, Texture, Rectangle } from 'pixi.js';
+import { Application, BaseTexture, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import type { FederatedPointerEvent } from 'pixi.js';
 import type { Dungeon } from '@prisma/client';
+import { Assets } from '@/game/assets';
 import { TileType, allTileTypes } from '@/types';
 import type { GameMode, TileMap } from '@/types';
 
 type Direction = 'up' | 'down' | 'left' | 'right';
 
-const tileSize = 8;
+export const tileSize = 8;
 const scale = 4;
 
 const initialTiles: TileMap = [
@@ -46,14 +47,6 @@ export class Game extends Application {
   private pointerDownY = 0;
   private pointerDownMs = 0;
 
-  private playerTexture!: Texture;
-  private wallTexture!: Texture;
-  private floorTexture!: Texture;
-  private keyTexture!: Texture;
-  private doorTexture!: Texture;
-  private gemTexture!: Texture;
-  private crateTexture!: Texture;
-
   private keyCount = 0;
 
   constructor(dungeon: Dungeon, mode: GameMode) {
@@ -67,7 +60,8 @@ export class Game extends Application {
 
     this.mode = mode;
     this.tiles = dungeon.tiles ? JSON.parse(dungeon.tiles) : initialTiles;
-  
+
+    Assets.init();
     this.initMap();
     this.initEvents();
     if (mode === 'edit') this.initToolbar();
@@ -79,16 +73,6 @@ export class Game extends Application {
   }
 
   private initMap() {
-    // TODO: setup an Assets class and call Assets.init();
-    const spritesheet = BaseTexture.from('/sprites.png');
-    this.floorTexture   = this.getTexture(spritesheet,  8, 2);
-    this.wallTexture    = this.getTexture(spritesheet,  0, 2);
-    this.keyTexture     = this.getTexture(spritesheet, 15, 4);
-    this.doorTexture    = this.getTexture(spritesheet, 13, 2);
-    this.playerTexture  = this.getTexture(spritesheet,  0, 3);
-    this.gemTexture     = this.getTexture(spritesheet, 21, 4);
-    this.crateTexture   = this.getTexture(spritesheet, 21, 2);
-
     this.tileGroup = new Container();
     this.stage.addChild(this.tileGroup);
 
@@ -117,7 +101,7 @@ export class Game extends Application {
     );
 
     if (this.mode === 'play') {
-      this.player = Sprite.from(this.playerTexture);
+      this.player = Sprite.from(Assets.playerTexture);
       this.player.x = spawnX;
       this.player.y = spawnY;
       this.stage.addChild(this.player);
@@ -253,7 +237,7 @@ export class Game extends Application {
       this.stage.addChild(bg);
 
       const btn = new Sprite();
-      this.setTileGraphics(btn, tileType);
+      Assets.setTileGraphics(btn, tileType);
       btn.x = x;
       btn.y = y;
       btn.interactive = true;
@@ -327,13 +311,13 @@ export class Game extends Application {
       } else if (tile === TileType.Key) {
         // Collect key.
         this.tiles[tileY][tileX] = TileType.Floor;
-        this.setTileGraphics(this.tileSprites[tileY][tileX], TileType.Floor);
+        Assets.setTileGraphics(this.tileSprites[tileY][tileX], TileType.Floor);
         this.keyCount += 1;
         allowMove = true;
       } else if (tile === TileType.Door && this.keyCount > 0) {
         // Open door.
         this.tiles[tileY][tileX] = TileType.Floor;
-        this.setTileGraphics(this.tileSprites[tileY][tileX], TileType.Floor);
+        Assets.setTileGraphics(this.tileSprites[tileY][tileX], TileType.Floor);
         this.keyCount -= 1;
         allowMove = true;
       } else if (tile === TileType.Crate) {
@@ -345,11 +329,11 @@ export class Game extends Application {
 
           // set current crate tile to floor
           this.tiles[tileY][tileX] = TileType.Floor;
-          this.setTileGraphics(this.tileSprites[tileY][tileX], TileType.Floor);
+          Assets.setTileGraphics(this.tileSprites[tileY][tileX], TileType.Floor);
 
           // set next crate tile to create
           this.tiles[nextCrateTileY][nextCrateTileX] = TileType.Crate;
-          this.setTileGraphics(this.tileSprites[nextCrateTileY][nextCrateTileX], TileType.Crate);
+          Assets.setTileGraphics(this.tileSprites[nextCrateTileY][nextCrateTileX], TileType.Crate);
 
           allowMove = true;
         }
@@ -391,14 +375,14 @@ export class Game extends Application {
       }
 
       this.tiles[y][x] = this.selectedTileType;
-      this.setTileGraphics(this.tileSprites[y][x], this.selectedTileType);
+      Assets.setTileGraphics(this.tileSprites[y][x], this.selectedTileType);
     }
   }
 
   private replaceAllTilesOfType(from: TileType, to: TileType) {
     this.forEachTile((tile, x, y) => {
       if (tile === from) {
-        this.setTileGraphics(this.tileSprites[y][x], to);
+        Assets.setTileGraphics(this.tileSprites[y][x], to);
         this.tiles[y][x] = to;
       }
     });
@@ -416,52 +400,10 @@ export class Game extends Application {
 
   private makeTileSprite(x: number, y: number, type: TileType) {
     const sprite = new Sprite();
-    this.setTileGraphics(sprite, type);
+    Assets.setTileGraphics(sprite, type);
     sprite.x = tileSize * x;
     sprite.y = tileSize * y;
     this.tileGroup.addChild(sprite);
     return sprite;
-  }
-
-  private getTexture(spritesheet: BaseTexture, x: number, y: number): Texture {
-    return new Texture(spritesheet, new Rectangle(tileSize * x, tileSize * y, tileSize, tileSize));
-  }
-
-  private setTileGraphics(sprite: Sprite, type: TileType) {
-    type Gfx = { texture: Texture, tint: number };
-
-    const gfx: Record<TileType, Gfx> = {
-      [TileType.Floor]: {
-        texture: this.floorTexture,
-        tint: 0x0F0F0F,
-      },
-      [TileType.Wall]: {
-        texture: this.wallTexture,
-        tint: 0x525252,
-      },
-      [TileType.Key]: {
-        texture: this.keyTexture,
-        tint: 0xfde047,
-      },
-      [TileType.Door]: {
-        texture: this.doorTexture,
-        tint: 0x9a3412,
-      },
-      [TileType.Spawn]: {
-        texture: this.playerTexture,
-        tint: 0xFFFFFF,
-      },
-      [TileType.Exit]: {
-        texture: this.gemTexture,
-        tint: 0x49AEE8,
-      },
-      [TileType.Crate]: {
-        texture: this.crateTexture,
-        tint: 0xd97706,
-      },
-    };
-
-    sprite.texture = gfx[type].texture;
-    sprite.tint = gfx[type].tint;
   }
 }
